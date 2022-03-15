@@ -38,10 +38,9 @@ public class Student{
 	private String password;
 	
 	@Column(name="confirmpassword", nullable = false)
-	@NotEmpty
-	private String confirmPassword;
+	private String confirmpassword;
 	
 	@Column(name="address", nullable = false)
 	@NotEmpty(message="Address cannot be empty")
-	private String Address;
+	private String address;
 }
