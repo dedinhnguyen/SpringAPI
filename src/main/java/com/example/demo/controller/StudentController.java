@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.Config.NewOuput;
 import com.example.demo.dto.StudentDTO;
+import com.example.demo.exception.ResourceNotFoundExeption;
 import com.example.demo.mapper.Convert;
 import com.example.demo.model.Student;
 import com.example.demo.service.StudentService;
@@ -34,39 +37,74 @@ public class StudentController {
 	
 	@PostMapping
 	public ResponseEntity<StudentDTO> saveStudent(@Valid @RequestBody StudentDTO studentdto) {
+		try {
 		StudentDTO studentdtorequest = studentservice.saveStudent(studentdto);
 		return new ResponseEntity<StudentDTO>(studentdtorequest, HttpStatus.CREATED);
-		
+		}
+		catch(Exception e) {
+		return new ResponseEntity<>(null, HttpStatus.CREATED);
+		}
 	}
 	
 	@GetMapping
 	public List<StudentDTO> findAllStudent(){
 		return studentservice.findAll();
-	}
-	@GetMapping("/page/{pageNum}")
-	public List<StudentDTO> findAllStudent(@PathVariable int pageNum){
-		return studentservice.findAllPagingAndSorting(pageNum);
+		
 	}
 	
+	@GetMapping("/page/")
+	public NewOuput showNew(@RequestParam("page") int page, @RequestParam("limit") int limit, @RequestParam String sort) {
+		NewOuput result= new NewOuput();
+		result.setPage(page);
+		result.setListResult(studentservice.findAllPagingAndSorting(page,limit, sort));
+		return result;
+	}
+     
 	@GetMapping("/{id}")
-	public ResponseEntity<StudentDTO> getStudentById(@PathVariable(name = "id") Long id) {
+	public ResponseEntity<StudentDTO> getStudentById(@PathVariable(name = "id") Long id) throws ResourceNotFoundExeption {
+		try {
 		Student student = studentservice.findStudentById(id);
 
 		StudentDTO studentResponse = convert.toDTO(student);
 
 		return ResponseEntity.ok().body(studentResponse);
 	}
+		catch(Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<StudentDTO> updateStudent(@PathVariable long id, @RequestBody StudentDTO studentDto) {
-
-		StudentDTO studentdtorequest = studentservice.saveStudent(studentDto);
+	public ResponseEntity<StudentDTO> updateStudent(@PathVariable long id, @RequestBody StudentDTO studentDto) throws ResourceNotFoundExeption {
+		try {
+			
+		StudentDTO studentdtorequest = studentservice.updateStudent(id,studentDto);
 
 		return ResponseEntity.ok().body(studentdtorequest);
+		}
+		catch(Exception e){
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+	}
+	@DeleteMapping
+	public ResponseEntity<HttpStatus> deleteAllStudent(){
+		try {
+		studentservice.deleteAllStudent();
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+		catch(Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	@DeleteMapping("{id}")
-	public List<StudentDTO> deleteStudent(@PathVariable(name = "id") Long id) {
+	public ResponseEntity<HttpStatus> deleteStudent(@PathVariable(name = "id") Long id){
+		try {
+			
 		studentservice.deleteStudentById(id);
-		return studentservice.findAll();
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		catch(Exception e){
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

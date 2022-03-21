@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -34,13 +33,18 @@ public class StudentServiceImpl implements StudentService {
 	} 
 
 	@Override
-	public Student updateStudent(Student student, long id) {
+	public StudentDTO updateStudent(long id, StudentDTO studentdto) {
 		Student exitingStudent = studentrepository.findById(id).orElseThrow(()-> new ResourceNotFoundExeption("Student", "Id", id));
-		exitingStudent.setName(student.getName());
-		exitingStudent.setEmail(student.getEmail());
-		exitingStudent.setAddress(student.getAddress());
+		if(exitingStudent != null) {
+//		exitingStudent= convert.toEntity(studentdto);
+		exitingStudent.setName(studentdto.getName());
 		studentrepository.save(exitingStudent);
-		return exitingStudent;
+		StudentDTO studentdtoreponse= convert.toDTO(exitingStudent);
+		return studentdtoreponse;
+	}
+		else {
+			return null;
+		}
 	}
 
 	@Override
@@ -48,11 +52,6 @@ public class StudentServiceImpl implements StudentService {
 		studentrepository.findById(id).orElseThrow(()-> new ResourceNotFoundExeption("Student","Id", id));
 		studentrepository.deleteById(id);
 	}
-	
-//	@Override
-//	public List<Student> findAllStudent() {
-//		return studentrepository.findAll();
-//	}
 
 	@Override
 	public Student findStudentById(long id) {
@@ -61,13 +60,9 @@ public class StudentServiceImpl implements StudentService {
 
 	@Override
 	public List<StudentDTO> findAll() {
-		List<StudentDTO> studentdto= new ArrayList<>();
-		List<Student> student = studentrepository.findAll();
-		for(Student item: student) {
-			StudentDTO newstudendto= convert.toDTO(item);
-			studentdto.add(newstudendto);
-		}
-		return studentdto;
+		List<Student> student= studentrepository.findAll();
+		List<StudentDTO> newstudentdto = convert.toListDTO(student);
+		return newstudentdto;
 	}
 
 	@Override
@@ -78,16 +73,25 @@ public class StudentServiceImpl implements StudentService {
 		return studentreponse;
 	}
 	
-	public List<StudentDTO> findAllPagingAndSorting(int pageNum) {
+	//sorting and paging
+	public List<StudentDTO> findAllPagingAndSorting(int pageNum, int pageSize, String sort){
 		List<StudentDTO> studentdto= new ArrayList<>();
-		Sort sort = Sort.by("id").ascending();
-	    int pageSize = 2;
-	    Pageable pageable = PageRequest.of(pageNum - 1, pageSize,sort);
-	    Page<Student> page = studentrepository.findAll(pageable);
-	    for(Student item: page) {
-			StudentDTO newstudendto= convert.toDTO(item);
-			studentdto.add(newstudendto);
-		}
+	    Pageable pageable = PageRequest.of(pageNum - 1, pageSize,Sort.by(sort));
+	    studentdto = convert.toPageDTO(pageable);
 	    return studentdto;
 	}
+
+	@Override
+	public List<StudentDTO> findAll(Pageable pageable) {
+		List<StudentDTO> results = new ArrayList<>();
+		List<Student> entities = studentrepository.findAll(pageable).getContent();
+		results= convert.toListDTO(entities);
+		return results;
+	}
+
+	@Override
+	public void deleteAllStudent() {
+		studentrepository.deleteAll();
+	}
+	
 }
