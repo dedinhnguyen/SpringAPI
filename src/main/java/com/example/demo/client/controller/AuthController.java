@@ -32,4 +32,4 @@ public class AuthController {
         String jwt = tokenProvider.generateToken(authentication);
         return new LoginResponse(jwt);
     }
-}            
+}

@@ -51,7 +51,7 @@ public class StudentController {
 		
 	}
 	
-//	@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+	@PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
 	@GetMapping("/page/")
 	public NewOuput showNew(@RequestParam("page") int page, @RequestParam("limit") int limit, @RequestParam String sort) {
 		NewOuput result= new NewOuput();
@@ -60,7 +60,7 @@ public class StudentController {
 		return result;
 	}
 	
-	@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+	@PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
 	@GetMapping("/{id}")
 	public ResponseEntity<StudentDTO> getStudentById(@PathVariable(name = "id") Long id) throws ResourceNotFoundExeption {
 		try {
@@ -75,7 +75,7 @@ public class StudentController {
 		}
 	}
 	
-	@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+	@PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
 	@PutMapping("/{id}")
 	public ResponseEntity<StudentDTO> updateStudent(@PathVariable long id, @RequestBody StudentDTO studentDto) throws ResourceNotFoundExeption {
 		try {
@@ -89,7 +89,7 @@ public class StudentController {
 		}
 	}
 	
-	@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+	@PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
 	@DeleteMapping
 	public ResponseEntity<String> deleteAllStudent(){
 		try {
@@ -101,7 +101,7 @@ public class StudentController {
 		}
 	}
 	
-	@PreAuthorize("hasAnyRole('MANAGER')")
+	@PreAuthorize("hasAnyRole('MODERATOR')")
 	@DeleteMapping("{id}")
 	public ResponseEntity<HttpStatus> deleteStudent(@PathVariable(name = "id") Long id){
 		try {
